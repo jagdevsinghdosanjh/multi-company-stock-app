@@ -1,0 +1,38 @@
+credentials:
+  usernames:
+    jsdosanjh:
+      name: Jagdev Singh Dosanjh
+      email: jsdosanjh@example.com
+      password: $2b$12$JF/udEBwBFPw04/ItU7SdOwYwmG3TnjnR2p.SKlB8i2AGuxccaBE2
+      role: superadmin
+      department: Administration
+      subject: Mathematics
+      access_expires: '2026-12-31'
+      location: Amritsar
+    admin:
+      name: Admin User
+      email: admin@example.com
+      password: $2b$12$NUmfF.fl.cQP8MJU/95WBOHkDPqSVgNLTQMHQQGABL3qTipyXNWYG
+      role: admin
+      department: IT
+      subject: System Management
+      access_expires: '2025-12-31'
+      location: Delhi
+    teacher:
+      name: Math Teacher
+      email: teacher@example.com
+      password: $2b$12$/u0WplmmMsJY2BBV.ASFRO9S4bH/Psdo2xy0axpofODc46JSx/dZC
+      role: teacher
+      department: Mathematics
+      subject: Algebra
+      access_expires: '2025-06-30'
+      location: Ludhiana
+cookie:
+  name: stock_app_session
+  key: 2b8166cd029e7e5d8241ceaddb38b872
+  expiry_days: 30
+preauthorized:
+  emails:
+  - jsdosanjh@example.com
+  - admin@example.com
+  - teacher@example.com
