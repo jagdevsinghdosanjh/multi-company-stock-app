@@ -102,7 +102,7 @@ st.markdown("""
     <br><hr>
     <div style='text-align:center; color:#888888; font-size:14px;'>
         Made with ❤️ by Jagdev Singh Dosanjh<br>
-        Powered by Polygon.io & Streamlit
+        Powered by Polygon.io & Streamlit<br>
         <a href="https://dosanjhpubsasr.org">DOSANJHPUBSASR.ORG</a>
     </div>
 """, unsafe_allow_html=True)
