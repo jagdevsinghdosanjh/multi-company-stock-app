@@ -1,54 +1,9 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
-import datetime
-import os
+import plotly.express as px
 
-LOG_FILE = "user_logs.csv"
+st.set_page_config(page_title="Multi-Company Stock Dashboard", layout="wide")
 
-# --- Visitor Logging ---
-if not os.path.exists(LOG_FILE):
-    pd.DataFrame(columns=["Timestamp", "Device", "Latitude", "Longitude"]).to_csv(LOG_FILE, index=False)
-
-components.html("""
-    <script>
-        async function logUserInfo() {
-            const device = navigator.userAgent;
-            let lat = "N/A", lon = "N/A";
-
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    lat = position.coords.latitude;
-                    lon = position.coords.longitude;
-
-                    const query = `?device=${encodeURIComponent(device)}&latitude=${lat}&longitude=${lon}`;
-                    window.location.href = window.location.pathname + query;
-                });
-            } else {
-                const query = `?device=${encodeURIComponent(device)}&latitude=N/A&longitude=N/A`;
-                window.location.href = window.location.pathname + query;
-            }
-        }
-
-        if (!window.location.search.includes("device")) {
-            logUserInfo();
-        }
-    </script>
-""", height=0)
-
-params = st.query_params
-if "device" in params and "latitude" in params and "longitude" in params:
-    device = params["device"]
-    lat = params["latitude"]
-    lon = params["longitude"]
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    if "logged" not in st.session_state:
-        pd.DataFrame([[timestamp, device, lat, lon]],
-                     columns=["Timestamp", "Device", "Latitude", "Longitude"]).to_csv(LOG_FILE, mode='a', header=False, index=False)
-        st.session_state.logged = True
-
-# --- Sidebar Navigation ---
 st.sidebar.title("📌 Navigation")
 page = st.sidebar.radio("Go to:", ["📊 Stock Dashboard", "👥 Visitor Logs"])
 
@@ -56,201 +11,36 @@ page = st.sidebar.radio("Go to:", ["📊 Stock Dashboard", "👥 Visitor Logs"])
 if page == "📊 Stock Dashboard":
     st.title("📊 Multi-Company Stock Dashboard")
 
-    # Replace with your actual data loading and visualization
-    companies = ["TCS", "Infosys", "Reliance", "HDFC"]
-    for company in companies:
-        st.subheader(f"📈 {company} Stock Overview")
-        st.write("🔹 Price trend, volume, and analytics go here.")
-        # You can add charts, tables, or interactive widgets here
+    uploaded_files = st.file_uploader("Upload CSV files for companies", type="csv", accept_multiple_files=True)
+
+    if uploaded_files:
+        for file in uploaded_files:
+            company_name = file.name.replace(".csv", "")
+            df = pd.read_csv(file, parse_dates=["Date"])
+
+            st.subheader(f"📈 {company_name} Stock Overview")
+
+            # Basic stats
+            st.write("🔹 Latest Close Price:", df["Close"].iloc[-1])
+            st.write("🔹 Average Volume:", round(df["Volume"].mean(), 2))
+
+            # Moving Average
+            df["MA_20"] = df["Close"].rolling(window=20).mean()
+
+            # Plot
+            fig = px.line(df, x="Date", y=["Close", "MA_20"],
+                          labels={"value": "Price", "variable": "Metric"},
+                          title=f"{company_name} - Close Price & MA(20)")
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Volume Bar Chart
+            vol_fig = px.bar(df, x="Date", y="Volume", title=f"{company_name} - Volume")
+            st.plotly_chart(vol_fig, use_container_width=True)
+    else:
+        st.info("📂 Upload one or more CSV files to begin.")
 
 # --- Page: Visitor Logs ---
 elif page == "👥 Visitor Logs":
     st.title("👥 Visitor Logs")
-    logs = pd.read_csv(LOG_FILE)
+    logs = pd.read_csv("user_logs.csv")
     st.dataframe(logs)
-
-# import streamlit as st
-# import streamlit.components.v1 as components
-# import pandas as pd
-# import datetime
-# import os
-
-# LOG_FILE = "user_logs.csv"
-
-# # Initialize log file if not exists
-# if not os.path.exists(LOG_FILE):
-#     df = pd.DataFrame(columns=["Timestamp", "Device", "Latitude", "Longitude"])
-#     df.to_csv(LOG_FILE, index=False)
-    
-# # Inject JavaScript to collect device and location info
-# components.html("""
-#     <script src="logger.js"></script>
-# """, height=0)
-
-# # Read query params
-# params = st.query_params
-# if "device" in params and "latitude" in params and "longitude" in params:
-#     device = params["device"]
-#     lat = params["latitude"]
-#     lon = params["longitude"]
-#     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-#     # Append to CSV if not already logged in this session
-#     if "logged" not in st.session_state:
-#         new_log = pd.DataFrame([[timestamp, device, lat, lon]],
-#                                columns=["Timestamp", "Device", "Latitude", "Longitude"])
-#         new_log.to_csv(LOG_FILE, mode='a', header=False, index=False)
-#         st.session_state.logged = True
-
-# # Display logs
-# st.markdown("### 👥 Visitor Logs")
-# logs = pd.read_csv(LOG_FILE)
-# st.dataframe(logs)
-
-# # import streamlit as st
-# # import streamlit.components.v1 as components
-# # import pandas as pd
-# # import datetime
-# # import os
-
-# # LOG_FILE = "user_logs.csv"
-
-# # # Initialize log file if not exists
-# # if not os.path.exists(LOG_FILE):
-# #     df = pd.DataFrame(columns=["Timestamp", "Device", "Latitude", "Longitude"])
-# #     df.to_csv(LOG_FILE, index=False)
-
-# # # Inject JavaScript to collect device and location info
-# # components.html("""
-# #     <script src="logger.js"></script>
-# # """, height=0)
-
-
-# # # Handle form submission
-# # if st.experimental_get_query_params():
-# #     pass  # Prevent rerun loop
-
-# # if st.request.method == "POST":
-# #     device = st.request.form.get("device", "Unknown")
-# #     lat = st.request.form.get("latitude", "N/A")
-# #     lon = st.request.form.get("longitude", "N/A")
-# #     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-# #     # Append to CSV
-# #     new_log = pd.DataFrame([[timestamp, device, lat, lon]],
-# #                            columns=["Timestamp", "Device", "Latitude", "Longitude"])
-# #     new_log.to_csv(LOG_FILE, mode='a', header=False, index=False)
-
-# # # Display logs
-# # st.markdown("### 👥 Visitor Logs")
-# # logs = pd.read_csv(LOG_FILE)
-# # st.dataframe(logs)
-
-# # # import streamlit as st
-# # # import requests
-# # # import pandas as pd
-# # # import os
-# # # from datetime import datetime  # ✅ Now meaningfully used
-# # # import streamlit as st
-
-# # # # Header
-# # # st.markdown("""
-# # #     <div style='background-color:#0E1117; padding:15px; border-radius:10px;'>
-# # #         <h1 style='color:#F5F5F5; text-align:center;'>📊 Stock Explorer Dashboard</h1>
-# # #         <p style='color:#CCCCCC; text-align:center;'>Track real-time data for top global and Indian companies</p>
-# # #     </div>
-# # #     <br>
-# # # """, unsafe_allow_html=True)
-
-
-# # # # --- Configuration ---
-# # # BASE_URL = "https://api.polygon.io/v2/aggs/ticker"
-# # # API_KEY = os.environ.get("POLYGON_API_KEY")
-# # # START_DATE = "2025-01-01"
-# # # END_DATE = "2025-07-31"
-
-# # # # --- Company Options ---
-# # # COMPANIES = {
-# # #     "Apple Inc. (AAPL)": "AAPL",
-# # #     "Alphabet Inc. (GOOGL)": "GOOGL",
-# # #     "Microsoft Corporation (MSFT)": "MSFT",
-# # #     "NVIDIA Corporation (NVDA)": "NVDA",
-# # #     "Tesla, Inc. (TSLA)": "TSLA",
-# # #     "Infosys Ltd. (INFY)": "INFY",
-# # #     "Amazon.com, Inc. (AMZN)": "AMZN",
-# # #     "Meta Platforms, Inc. (META)": "META",
-# # #     "Intel Corporation (INTC)": "INTC",
-# # #     "Advanced Micro Devices, Inc. (AMD)": "AMD",
-# # #     "Oracle Corporation (ORCL)": "ORCL",
-# # #     "Cisco Systems, Inc. (CSCO)": "CSCO",
-# # #     "IBM Corporation (IBM)": "IBM",
-# # #     "Reliance Industries Ltd. (RELIANCE)": "RELIANCE",
-# # #     "Tata Consultancy Services Ltd. (TCS)": "TCS",
-# # #     "HCL Technologies Ltd. (HCLTECH)": "HCLTECH",
-# # #     "Wipro Ltd. (WIPRO)": "WIPRO",
-# # #     "Bharti Airtel Ltd. (BHARTIARTL)": "BHARTIARTL",
-# # #     "ICICI Bank Ltd. (ICICIBANK)": "ICICIBANK",
-# # #     "HDFC Bank Ltd. (HDFCBANK)": "HDFCBANK"
-# # # }
-
-
-# # # # --- Streamlit UI ---
-# # # st.set_page_config(page_title="Multi-Company Stock App", layout="wide")
-# # # st.title("📈 Multi-Company Stock Data Viewer")
-
-# # # # ✅ Display current date using datetime
-# # # st.caption(f"📅 Today's Date: {datetime.now().strftime('%A, %d %B %Y')}")
-
-# # # selected_company = st.selectbox("Select a Company", list(COMPANIES.keys()))
-# # # ticker = COMPANIES[selected_company]
-
-# # # # --- Fetch Data ---
-# # # @st.cache_data(ttl=3600)
-# # # def fetch_stock_data(ticker):
-# # #     if not API_KEY:
-# # #         st.error("API key not found. Please set POLYGON_API_KEY in your environment.")
-# # #         return None
-
-# # #     url = f"{BASE_URL}/{ticker}/range/1/day/{START_DATE}/{END_DATE}?apiKey={API_KEY}"
-# # #     response = requests.get(url)
-# # #     if response.status_code != 200:
-# # #         st.error("Failed to fetch data.")
-# # #         return None
-# # #     data = response.json()
-# # #     if "results" not in data:
-# # #         st.warning("No results found.")
-# # #         return None
-# # #     df = pd.DataFrame(data["results"])
-# # #     df["date"] = pd.to_datetime(df["t"], unit="ms").dt.date
-# # #     df = df.rename(columns={
-# # #         "v": "Volume",
-# # #         "vw": "VWAP",
-# # #         "o": "Open",
-# # #         "c": "Close",
-# # #         "h": "High",
-# # #         "l": "Low",
-# # #         "n": "Trades"
-# # #     })
-# # #     return df[["date", "Volume", "VWAP", "Open", "Close", "High", "Low", "Trades"]]
-
-# # # df = fetch_stock_data(ticker)
-
-# # # # --- Display Data ---
-# # # if df is not None:
-# # #     st.subheader(f"Stock Data for {selected_company}")
-# # #     st.dataframe(df, use_container_width=True)
-
-# # #     # --- Chart ---
-# # #     st.subheader("📊 Price Trend")
-# # #     st.line_chart(df.set_index("date")[["Open", "Close", "High", "Low"]])
-# # # else:
-# # #     st.stop()
-# # # # Footer
-# # # st.markdown("""
-# # #     <br><hr>
-# # #     <div style='text-align:center; color:#888888; font-size:14px;'>
-# # #         Made with ❤️ by Jagdev Singh Dosanjh<br>
-# # #         Powered by Polygon.io & Streamlit<br>
-# # #         <a href="https://dosanjhpubsasr.org">DOSANJHPUBSASR.ORG</a>
-# # #     </div>
-# # # """, unsafe_allow_html=True)
