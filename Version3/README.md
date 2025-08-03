@@ -57,7 +57,7 @@ Add your API key in Secrets Manager:
     POLYGON_API_KEY = your_actual_polygon_api_key_here
 
 📂 File Structure
-![](image.png)
+Version3/File Structure.jpg
 
 📌 Notes
 You can modify START_DATE and END_DATE in app.py to change the data range.
