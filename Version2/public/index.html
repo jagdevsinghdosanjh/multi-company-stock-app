@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Multi-Company Stock Data</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Stock Data</h1>
+    <select id="company-select">
+      <option value="AAPL">Apple Inc. (AAPL)</option>
+      <option value="GOOGL">Alphabet Inc. (GOOGL)</option>
+      <option value="MSFT">Microsoft Corporation (MSFT)</option>
+      <option value="NVDA">NVIDIA (NVDA)</option>
+      <option value="TSLA">Tesla, Inc. (TSLA)</option>
+      <option value="INFY">Infosys Ltd. (INFY)</option>
+    </select>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Volume</th>
+          <th>VWAP</th>
+          <th>Open</th>
+          <th>Close</th>
+          <th>High</th>
+          <th>Low</th>
+          <th>Trades</th>
+        </tr>
+      </thead>
+      <tbody id="stock-data"></tbody>
+    </table>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
