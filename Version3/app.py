@@ -19,7 +19,7 @@ st.markdown("""
 BASE_URL = "https://api.polygon.io/v2/aggs/ticker"
 API_KEY = os.environ.get("POLYGON_API_KEY")
 START_DATE = "2025-01-01"
-END_DATE = "2025-07-31"
+END_DATE = "2025-08-18"
 
 # --- Company Options ---
 COMPANIES = {
